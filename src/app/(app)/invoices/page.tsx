@@ -16,7 +16,7 @@ function formatAmount(amount: string, currency: string) {
 function daysFromNow(dateStr: string) {
   const due = new Date(dateStr + "T00:00:00Z").getTime();
   const now = Date.now();
-  return Math.floor((now - due) / (1000 * 60 * 60 * 24));
+  return Math.floor((now - due) / (1000 * 60 * 60 * 24)); 
 }
 
 const STATUS_STYLES: Record<string, string> = {

@@ -8,7 +8,7 @@ import { invoiceUpdateSchema } from "@/lib/validators";
 async function getSessionOrUnauth() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
-    return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) as const };
+    return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) };
   }
   return { session };
 }
