@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -21,10 +21,8 @@ export default function NewInvoicePage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function submit(fd: FormData) {
     setSubmitting(true);
-    const fd = new FormData(e.currentTarget);
     const payload = {
       clientName: fd.get("clientName"),
       clientEmail: fd.get("clientEmail"),
@@ -62,37 +60,24 @@ export default function NewInvoicePage() {
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">New invoice</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void submit(new FormData(e.currentTarget));
+        }}
+        className="space-y-5 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+      >
         <Field label="Client name">
-          <input
-            name="clientName"
-            required
-            maxLength={200}
-            autoFocus
-            className={inputCls}
-          />
+          <input name="clientName" required maxLength={200} autoFocus className={inputCls} />
         </Field>
 
         <Field label="Client email">
-          <input
-            name="clientEmail"
-            type="email"
-            required
-            maxLength={254}
-            className={inputCls}
-          />
+          <input name="clientEmail" type="email" required maxLength={254} className={inputCls} />
         </Field>
 
         <div className="grid grid-cols-3 gap-3">
           <Field label="Amount" className="col-span-2">
-            <input
-              name="amount"
-              type="number"
-              step="0.01"
-              min="0.01"
-              required
-              className={inputCls}
-            />
+            <input name="amount" type="number" step="0.01" min="0.01" required className={inputCls} />
           </Field>
           <Field label="Currency">
             <select name="currency" defaultValue="USD" className={inputCls}>
