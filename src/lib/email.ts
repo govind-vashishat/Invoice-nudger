@@ -1,4 +1,7 @@
 import { Resend } from "resend";
+import { render } from "@react-email/render";
+import { NudgeEmail, nudgeSubject, type NudgeTone } from "@/emails/nudge";
+import { FreelancerNotifyEmail, freelancerNotifySubject } from "@/emails/freelancer-notify";
 
 if (!process.env.RESEND_API_KEY) {
   throw new Error("RESEND_API_KEY is not set");
