@@ -34,6 +34,47 @@ export async function sendEmail({
   return data;
 }
 
+export async function sendNudgeEmail(args: {
+  to: string;
+  tone: NudgeTone;
+  clientName: string;
+  amountFormatted: string;
+  daysOverdue: number;
+  payNowUrl: string | null;
+  senderName: string;
+  fromName?: string;
+}) {
+  const html = await render(
+    NudgeEmail({
+      tone: args.tone,
+      clientName: args.clientName,
+      amountFormatted: args.amountFormatted,
+      daysOverdue: args.daysOverdue,
+      payNowUrl: args.payNowUrl,
+      senderName: args.senderName,
+    }),
+  );
+  const subject = nudgeSubject(args.tone, args.amountFormatted, args.daysOverdue);
+  const from = args.fromName ? `${args.fromName} <${FROM}>` : FROM;
+  return sendEmail({ to: args.to, subject, html, from });
+}
+
+export async function sendFreelancerNotify(args: {
+  to: string;
+  freelancerName: string;
+  clientName: string;
+  amountFormatted: string;
+  daysOverdue: number;
+  tone: NudgeTone;
+}) {
+  const html = await render(FreelancerNotifyEmail(args));
+  return sendEmail({
+    to: args.to,
+    subject: freelancerNotifySubject(args.clientName),
+    html,
+  });
+}
+
 export function magicLinkEmail({ url, appName }: { url: string; appName: string }) {
   return `
 <!doctype html>

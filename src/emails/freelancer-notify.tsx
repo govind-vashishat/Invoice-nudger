@@ -12,7 +12,7 @@ export function FreelancerNotifyEmail({ freelancerName, clientName, amountFormat
   return (
     <Html>
       <Head />
-      <Preview>Nudged {clientName} ({tone}, {daysOverdue}d overdue)</Preview>
+      <Preview>{`Nudged ${clientName} (${tone}, ${daysOverdue}d overdue)`}</Preview>
       <Body style={{ backgroundColor: "#fafafa", fontFamily: "-apple-system, system-ui, sans-serif", padding: "32px 0", margin: 0 }}>
         <Container style={{ backgroundColor: "#ffffff", border: "1px solid #eaeaea", borderRadius: 12, maxWidth: 480, margin: "0 auto", padding: 28 }}>
           <Text style={{ fontSize: 16, color: "#111", margin: "0 0 12px" }}>Hi {freelancerName},</Text>
