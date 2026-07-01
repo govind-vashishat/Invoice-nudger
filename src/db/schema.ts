@@ -96,6 +96,27 @@ export const verification = pgTable(
 export const invoiceStatus = pgEnum("invoice_status", ["pending", "overdue", "paid"]);
 export const tonePref = pgEnum("tone_pref", ["auto", "polite", "firm", "final"]);
 export const nudgeTone = pgEnum("nudge_tone", ["polite", "firm", "final"]);
+export const subscriptionStatus = pgEnum("subscription_status", [
+  "trialing",
+  "active",
+  "past_due",
+  "on_hold",
+  "canceled",
+  "none",
+]);
+
+export const subscriptions = pgTable("subscriptions", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  status: subscriptionStatus("status").notNull().default("trialing"),
+  trialEndsAt: timestamp("trial_ends_at", { withTimezone: true }),
+  currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+  dodoSubscriptionId: text("dodo_subscription_id"),
+  dodoCustomerId: text("dodo_customer_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const invoices = pgTable(
   "invoices",
