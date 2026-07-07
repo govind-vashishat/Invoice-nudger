@@ -26,7 +26,6 @@ export async function POST() {
     product_cart: [{ product_id: process.env.DODO_PRODUCT_ID, quantity: 1 }],
     customer: {
       email: session.user.email,
-      name: session.user.name,
     },
     subscription_data: { trial_period_days: TRIAL_DAYS },
     return_url: returnUrl,
