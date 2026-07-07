@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { eq } from "drizzle-orm";
 import DodoPayments from "dodopayments";
 import { auth } from "@/lib/auth";
 import { db, subscriptions } from "@/db";
@@ -12,6 +13,16 @@ export async function POST() {
 
   if (!process.env.DODO_PAYMENTS_API_KEY || !process.env.DODO_PRODUCT_ID) {
     return NextResponse.json({ error: "billing_not_configured" }, { status: 500 });
+  }
+
+  // Guard: if user already has an active Dodo subscription, don't create a duplicate.
+  const [existing] = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, session.user.id))
+    .limit(1);
+  if (existing?.status === "active" && existing.dodoSubscriptionId) {
+    return NextResponse.json({ checkoutUrl: "/dashboard" });
   }
 
   const client = new DodoPayments({

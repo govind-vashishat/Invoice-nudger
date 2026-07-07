@@ -1,9 +1,28 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
+import { db, subscriptions } from "@/db";
 import { requireSession } from "@/lib/session";
 import { SignOutButton } from "@/components/sign-out-button";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await requireSession();
+
+  const [sub] = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, session.user.id))
+    .limit(1);
+
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
+  const hasAccess =
+    !!sub &&
+    (sub.status === "active" || sub.status === "trialing") &&
+    ((sub.currentPeriodEnd && sub.currentPeriodEnd.getTime() > now) ||
+      (sub.trialEndsAt && sub.trialEndsAt.getTime() > now));
+
+  if (!hasAccess) redirect("/paywall");
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-black">
