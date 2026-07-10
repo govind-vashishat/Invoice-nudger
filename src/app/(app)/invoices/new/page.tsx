@@ -52,54 +52,35 @@ export default function NewInvoicePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <section className="glass-panel rounded-[30px] p-6">
-        <Link href="/invoices" className="text-sm font-medium text-[var(--violet-strong)] hover:underline">
-          Back to invoices
+    <div className="mx-auto max-w-xl space-y-6">
+      <div>
+        <Link href="/invoices" className="text-xs text-zinc-500 hover:text-zinc-300">
+          ← Invoices
         </Link>
-        <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
-              New record
-            </div>
-            <h2 className="mt-2 text-3xl font-semibold text-[var(--foreground)]">Log invoice</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              Add the client, amount, due date, and any helpful notes. Once saved, this invoice can
-              be nudged automatically when it becomes overdue.
-            </p>
-          </div>
-          <div className="rounded-[24px] border border-[rgba(140,126,213,0.14)] bg-white/82 px-4 py-3">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
-              Default sequence
-            </div>
-            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">7 / 14 / 21 days</div>
-          </div>
-        </div>
-      </section>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">New invoice</h1>
+        <p className="mt-1 text-sm text-zinc-500">Under 30 seconds. Then we take over.</p>
+      </div>
 
       <form
         onSubmit={(e) => {
           e.preventDefault();
           void submit(new FormData(e.currentTarget));
         }}
-        className="metric-panel space-y-6 rounded-[30px] p-6 sm:p-8"
+        className="space-y-5 rounded-lg border border-zinc-800 bg-zinc-950 p-6"
       >
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Field label="Client name" hint="Who should receive the reminders?">
-            <input name="clientName" required maxLength={200} autoFocus className={inputCls} />
-          </Field>
+        <Field label="Client name">
+          <input name="clientName" required maxLength={200} autoFocus className={inputCls} />
+        </Field>
 
-          <Field label="Client email" hint="Used for reminder delivery.">
-            <input name="clientEmail" type="email" required maxLength={254} className={inputCls} />
-          </Field>
-        </div>
+        <Field label="Client email">
+          <input name="clientEmail" type="email" required maxLength={254} className={inputCls} />
+        </Field>
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <Field label="Amount" hint="Invoice total before the reminder sequence begins.">
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Amount" className="col-span-2">
             <input name="amount" type="number" step="0.01" min="0.01" required className={inputCls} />
           </Field>
-
-          <Field label="Currency" hint="Displayed everywhere this invoice appears.">
+          <Field label="Currency">
             <select name="currency" defaultValue="USD" className={inputCls}>
               {COMMON_CURRENCIES.map((c) => (
                 <option key={c} value={c}>
@@ -110,33 +91,32 @@ export default function NewInvoicePage() {
           </Field>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Field label="Date sent" hint="When you originally sent the invoice.">
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Date sent">
             <input name="dateSent" type="date" defaultValue={todayISO()} required className={inputCls} />
           </Field>
-
-          <Field label="Due date" hint="The system starts calculating overdue windows from this date.">
+          <Field label="Due date">
             <input name="dueDate" type="date" defaultValue={inDaysISO(30)} required className={inputCls} />
           </Field>
         </div>
 
-        <Field label="Notes" hint="Optional internal notes for context or follow-up history.">
-          <textarea name="notes" rows={5} maxLength={2000} className={`${inputCls} resize-none`} />
+        <Field label="Notes (optional)">
+          <textarea name="notes" rows={3} maxLength={2000} className={`${inputCls} resize-none`} />
         </Field>
 
-        <div className="flex flex-col gap-3 border-t border-[rgba(140,126,213,0.14)] pt-6 sm:flex-row sm:justify-end">
+        <div className="flex justify-end gap-2 border-t border-zinc-900 pt-5">
           <Link
             href="/invoices"
-            className="ui-button-secondary inline-flex items-center justify-center px-5 py-3 text-sm font-semibold"
+            className="rounded-md border border-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-900"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={submitting}
-            className="ui-button px-5 py-3 text-sm font-semibold disabled:opacity-50"
+            className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-emerald-400 disabled:opacity-50"
           >
-            {submitting ? "Saving..." : "Save invoice"}
+            {submitting ? "Saving…" : "Save invoice"}
           </button>
         </div>
       </form>
@@ -144,22 +124,22 @@ export default function NewInvoicePage() {
   );
 }
 
-const inputCls = "ui-input w-full px-4 py-3 text-sm";
+const inputCls =
+  "w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none [color-scheme:dark]";
 
 function Field({
   label,
-  hint,
   children,
+  className,
 }: {
   label: string;
-  hint: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <label className="block space-y-2">
-      <span className="text-sm font-semibold text-[var(--foreground)]">{label}</span>
+    <label className={`block space-y-1.5 ${className ?? ""}`}>
+      <span className="label-eyebrow">{label}</span>
       {children}
-      <span className="block text-xs leading-5 text-[var(--muted)]">{hint}</span>
     </label>
   );
 }

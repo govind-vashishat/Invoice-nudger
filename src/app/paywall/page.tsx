@@ -12,7 +12,6 @@ export default async function PaywallPage() {
     .where(eq(subscriptions.userId, session.user.id))
     .limit(1);
 
-  // Server component runs once per request; current time is intentional here.
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const trialEnded = !!sub?.trialEndsAt && new Date(sub.trialEndsAt).getTime() <= now;
@@ -22,64 +21,49 @@ export default async function PaywallPage() {
     : "Free for 7 days, then $25/month. Cancel anytime.";
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-12">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(127,69,221,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(145,233,177,0.18),transparent_28%),linear-gradient(180deg,#faf9ff_0%,#f2f1ff_100%)]" />
+    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
+        <div className="mb-10 flex items-center gap-2 text-sm font-semibold tracking-tight text-zinc-400">
+          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+          Invoice Nudger
+        </div>
 
-      <div className="relative grid w-full max-w-5xl gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <section className="glass-panel rounded-[34px] p-8">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">
-            Billing
-          </div>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight text-[var(--foreground)]">
-            {headline}
-          </h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{subline}</p>
+        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-8">
+          <h1 className="text-2xl font-semibold tracking-tight">{headline}</h1>
+          <p className="mt-2 text-sm text-zinc-500">{subline}</p>
 
-          <div className="mt-8 grid gap-4">
-            <Feature title="Unlimited invoice tracking" />
-            <Feature title="Automated reminders at your chosen intervals" />
-            <Feature title="Payment links baked into every client email" />
-            <Feature title="Nudge history plus recent collections visibility" />
-          </div>
-        </section>
-
-        <section className="metric-panel rounded-[34px] p-8">
-          <div className="rounded-[30px] bg-[linear-gradient(135deg,var(--navy)_0%,#2b1f8e_55%,var(--violet)_100%)] p-7 text-white shadow-[0_22px_50px_rgba(29,16,92,0.22)]">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/64">
-              Invoice Nudger Pro
+          <div className="mt-6 rounded-lg border border-zinc-800 bg-zinc-950 p-5">
+            <div className="label-eyebrow">Invoice Nudger Pro</div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl font-semibold">$25</span>
+              <span className="text-sm text-zinc-500">/ month</span>
             </div>
-            <div className="mt-4 text-5xl font-semibold">
-              $25 <span className="text-lg font-medium text-white/72">/ month</span>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-white/76">
-              Designed for freelancers who want calmer collections and fewer manual follow-ups.
-            </p>
-          </div>
-
-          <div className="mt-6 rounded-[26px] border border-[rgba(140,126,213,0.14)] bg-[rgba(239,234,255,0.58)] p-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-[var(--muted)]">
-              Signed in
-            </div>
-            <div className="mt-2 text-sm font-semibold text-[var(--foreground)]">{session.user.email}</div>
+            <ul className="mt-5 space-y-2 text-sm text-zinc-300">
+              {[
+                "Unlimited invoices",
+                "Automated nudges at 7 / 14 / 21 days",
+                "Pay Now button in every email",
+                "Configurable intervals + tone",
+                "Nudge history + delivery tracking",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="mt-2 h-1 w-1 flex-none rounded-full bg-emerald-500" />
+                  {f}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="mt-6">
             <SubscribeButton hasTrialed={trialEnded} />
           </div>
 
-          <div className="mt-6 flex justify-end border-t border-[rgba(140,126,213,0.14)] pt-6">
+          <div className="mt-6 flex items-center justify-between border-t border-zinc-900 pt-5 text-xs text-zinc-500">
+            <span>{session.user.email}</span>
             <SignOutButton />
           </div>
-        </section>
+        </div>
       </div>
     </main>
-  );
-}
-
-function Feature({ title }: { title: string }) {
-  return (
-    <div className="rounded-[22px] border border-[rgba(140,126,213,0.14)] bg-white/72 px-4 py-4 text-sm font-medium text-[var(--foreground)]">
-      {title}
-    </div>
   );
 }

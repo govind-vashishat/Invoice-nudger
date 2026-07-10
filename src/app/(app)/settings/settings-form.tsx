@@ -16,10 +16,10 @@ type Props = {
 };
 
 const TONE_OPTIONS: { value: Tone; label: string; hint: string }[] = [
-  { value: "auto", label: "Auto", hint: "Escalates from polite to final notice as intervals advance." },
-  { value: "polite", label: "Polite", hint: "Keeps every message calm and collaborative." },
-  { value: "firm", label: "Firm", hint: "Sets a more direct tone across the whole sequence." },
-  { value: "final", label: "Final notice", hint: "Uses your strongest reminder language every time." },
+  { value: "auto", label: "Auto", hint: "Polite → firm → final per interval" },
+  { value: "polite", label: "Polite", hint: "Friendly on every nudge" },
+  { value: "firm", label: "Firm", hint: "Direct on every nudge" },
+  { value: "final", label: "Final notice", hint: "Strong on every nudge" },
 ];
 
 export function SettingsForm({ initial }: Props) {
@@ -58,7 +58,7 @@ export function SettingsForm({ initial }: Props) {
       const data = await res.json().catch(() => ({}));
       toast.error(
         data.error === "invalid_input"
-          ? "Please check your inputs (payment URL must be a valid URL)"
+          ? "Please check your inputs (payment URL must be valid)"
           : "Couldn't save settings",
       );
       return;
@@ -73,38 +73,30 @@ export function SettingsForm({ initial }: Props) {
         e.preventDefault();
         void save();
       }}
-      className="metric-panel space-y-6 rounded-[30px] p-6 sm:p-8"
+      className="space-y-5 rounded-lg border border-zinc-800 bg-zinc-950 p-6"
     >
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Field
-          label="Payment URL"
-          hint="This powers the Pay Now CTA in every reminder email."
-        >
-          <input
-            type="url"
-            value={paymentUrl}
-            onChange={(e) => setPaymentUrl(e.target.value)}
-            placeholder="https://razorpay.me/yourname"
-            className={inputCls}
-          />
-        </Field>
+      <Field label="Payment URL" hint="Pasted into every nudge as the Pay Now button.">
+        <input
+          type="url"
+          value={paymentUrl}
+          onChange={(e) => setPaymentUrl(e.target.value)}
+          placeholder="https://razorpay.me/yourname"
+          className={inputCls}
+        />
+      </Field>
 
-        <Field label="Sender name" hint="Shown as the visible sender for your outbound nudges.">
-          <input
-            type="text"
-            maxLength={100}
-            value={senderName}
-            onChange={(e) => setSenderName(e.target.value)}
-            placeholder="Your name or studio"
-            className={inputCls}
-          />
-        </Field>
-      </div>
+      <Field label="Sender name" hint="Shown as the From name on emails to clients.">
+        <input
+          type="text"
+          maxLength={100}
+          value={senderName}
+          onChange={(e) => setSenderName(e.target.value)}
+          placeholder="Your name or business"
+          className={inputCls}
+        />
+      </Field>
 
-      <Field
-        label="Nudge intervals"
-        hint="Comma-separated days past due. We sort and deduplicate automatically."
-      >
+      <Field label="Nudge intervals" hint="Comma-separated days past due. Default 7, 14, 21.">
         <input
           type="text"
           value={intervalsText}
@@ -114,40 +106,41 @@ export function SettingsForm({ initial }: Props) {
         />
       </Field>
 
-      <Field label="Email tone" hint="Choose how assertive the sequence should feel to clients.">
-        <div className="grid gap-3 sm:grid-cols-2">
+      <Field label="Email tone">
+        <div className="grid grid-cols-2 gap-2">
           {TONE_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => setTone(opt.value)}
-              className={`rounded-[22px] border px-4 py-4 text-left shadow-[0_8px_22px_rgba(27,16,89,0.04)] ${
+              className={`rounded-md border px-3 py-2 text-left text-sm transition ${
                 tone === opt.value
-                  ? "border-[rgba(127,69,221,0.36)] bg-[linear-gradient(180deg,#efeaff_0%,#e2dbff_100%)]"
-                  : "border-[rgba(140,126,213,0.12)] bg-white/82 hover:bg-white"
+                  ? "border-emerald-800 bg-emerald-950/30 text-zinc-100"
+                  : "border-zinc-800 text-zinc-300 hover:bg-zinc-900"
               }`}
             >
-              <div className="text-sm font-semibold text-[var(--foreground)]">{opt.label}</div>
-              <div className="mt-2 text-xs leading-5 text-[var(--muted)]">{opt.hint}</div>
+              <div className="font-medium">{opt.label}</div>
+              <div className="mt-0.5 text-xs text-zinc-500">{opt.hint}</div>
             </button>
           ))}
         </div>
       </Field>
 
-      <div className="flex justify-end border-t border-[rgba(140,126,213,0.14)] pt-6">
+      <div className="flex justify-end border-t border-zinc-900 pt-5">
         <button
           type="submit"
           disabled={saving}
-          className="ui-button px-5 py-3 text-sm font-semibold disabled:opacity-50"
+          className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-emerald-400 disabled:opacity-50"
         >
-          {saving ? "Saving..." : "Save settings"}
+          {saving ? "Saving…" : "Save settings"}
         </button>
       </div>
     </form>
   );
 }
 
-const inputCls = "ui-input w-full px-4 py-3 text-sm";
+const inputCls =
+  "w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none";
 
 function Field({
   label,
@@ -155,14 +148,14 @@ function Field({
   children,
 }: {
   label: string;
-  hint: string;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
-    <label className="block space-y-2">
-      <span className="text-sm font-semibold text-[var(--foreground)]">{label}</span>
+    <label className="block space-y-1.5">
+      <span className="label-eyebrow">{label}</span>
       {children}
-      <span className="block text-xs leading-5 text-[var(--muted)]">{hint}</span>
+      {hint && <span className="block text-xs text-zinc-500">{hint}</span>}
     </label>
   );
 }

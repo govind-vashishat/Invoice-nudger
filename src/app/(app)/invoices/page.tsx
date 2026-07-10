@@ -20,9 +20,9 @@ function daysFromNow(dateStr: string) {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "status-pill bg-[rgba(123,92,228,0.14)] text-[var(--navy)]",
-  overdue: "status-pill bg-[rgba(255,196,95,0.26)] text-[#8a4f00]",
-  paid: "status-pill bg-[rgba(118,213,151,0.24)] text-[#1b6b38]",
+  pending: "bg-zinc-900 text-zinc-300 border border-zinc-800",
+  overdue: "bg-amber-950/40 text-amber-400 border border-amber-900/60",
+  paid: "bg-emerald-950/40 text-emerald-400 border border-emerald-900/60",
 };
 
 export default async function InvoicesPage() {
@@ -34,110 +34,80 @@ export default async function InvoicesPage() {
     .orderBy(desc(invoices.createdAt));
 
   return (
-    <div className="space-y-6">
-      <section className="glass-panel rounded-[30px] p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
-              Collections
-            </div>
-            <h2 className="mt-2 text-3xl font-semibold text-[var(--foreground)]">Invoices</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-              Track each client, see what&apos;s slipping overdue, and close out payments without
-              bouncing between tools.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <StatPill label="Total invoices" value={String(rows.length)} />
-            <Link href="/invoices/new" className="ui-button inline-flex items-center px-5 py-3 text-sm font-semibold">
-              New invoice
-            </Link>
-          </div>
+    <div className="space-y-8">
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Invoices</h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            {rows.length === 0
+              ? "Add your first invoice to start automated reminders."
+              : `${rows.length} total`}
+          </p>
         </div>
-      </section>
+        <Link
+          href="/invoices/new"
+          className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-emerald-400"
+        >
+          New invoice
+        </Link>
+      </div>
 
       {rows.length === 0 ? (
-        <section className="metric-panel rounded-[30px] px-6 py-16 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--lavender),#d7d0ff)] text-[var(--violet-strong)] shadow-[0_10px_24px_rgba(27,16,89,0.08)]">
-            <InvoiceStackIcon />
-          </div>
-          <h3 className="mt-6 text-2xl font-semibold text-[var(--foreground)]">No invoices yet</h3>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">
-            Add your first client invoice and the dashboard will start calculating due dates,
-            automation windows, and payment progress.
+        <div className="rounded-lg border border-dashed border-zinc-800 py-20 text-center">
+          <div className="text-sm font-medium text-zinc-300">No invoices yet</div>
+          <p className="mx-auto mt-2 max-w-sm text-xs text-zinc-500">
+            Log your first invoice and we&apos;ll start tracking overdue windows automatically.
           </p>
-          <Link href="/invoices/new" className="ui-button mt-6 inline-flex px-5 py-3 text-sm font-semibold">
+          <Link
+            href="/invoices/new"
+            className="mt-6 inline-block rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-emerald-400"
+          >
             Create invoice
           </Link>
-        </section>
+        </div>
       ) : (
-        <section className="metric-panel overflow-hidden rounded-[30px]">
-          <div className="border-b border-[rgba(140,126,213,0.14)] px-6 py-5">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
-              Ledger
-            </div>
-            <div className="mt-1 text-xl font-semibold text-[var(--foreground)]">
-              Client receivables table
-            </div>
-          </div>
-
+        <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left">
-              <thead className="bg-[rgba(239,234,255,0.58)]">
-                <tr className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
-                  <th className="px-6 py-4">Client</th>
-                  <th className="px-6 py-4">Amount</th>
-                  <th className="px-6 py-4">Due</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-900 text-[10px] uppercase tracking-wider text-zinc-500">
+                  <th className="px-5 py-3 font-medium">Client</th>
+                  <th className="px-5 py-3 font-medium">Amount</th>
+                  <th className="px-5 py-3 font-medium">Due</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                  <th className="px-5 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-zinc-900">
                 {rows.map((inv) => {
                   const days = daysFromNow(inv.dueDate);
                   const isPaid = inv.status === "paid";
                   return (
-                    <tr
-                      key={inv.id}
-                      className="border-t border-[rgba(140,126,213,0.1)] bg-white/72 align-top"
-                    >
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--lavender),#d7d0ff)] text-sm font-bold text-[var(--navy)]">
-                            {inv.clientName
-                              .split(" ")
-                              .slice(0, 2)
-                              .map((part) => part[0])
-                              .join("")
-                              .toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="text-sm font-semibold text-[var(--foreground)]">
-                              {inv.clientName}
-                            </div>
-                            <div className="mt-1 text-xs text-[var(--muted)]">{inv.clientEmail}</div>
-                          </div>
-                        </div>
+                    <tr key={inv.id} className="hover:bg-zinc-900/50">
+                      <td className="px-5 py-4">
+                        <div className="font-medium">{inv.clientName}</div>
+                        <div className="mt-0.5 text-xs text-zinc-500">{inv.clientEmail}</div>
                       </td>
-                      <td className="px-6 py-5">
-                        <div className="text-sm font-semibold text-[var(--foreground)]">
+                      <td className="px-5 py-4">
+                        <div className="mono-nums font-medium">
                           {formatAmount(inv.amount, inv.currency)}
                         </div>
-                        <div className="mt-1 text-xs text-[var(--muted)]">{inv.currency}</div>
+                        <div className="mt-0.5 text-xs text-zinc-500">{inv.currency}</div>
                       </td>
-                      <td className="px-6 py-5">
-                        <div className="text-sm font-semibold text-[var(--foreground)]">
-                          {inv.dueDate}
-                        </div>
+                      <td className="px-5 py-4">
+                        <div className="mono-nums">{inv.dueDate}</div>
                         {!isPaid && days > 0 && (
-                          <div className="mt-1 text-xs font-medium text-[#8a4f00]">{days}d overdue</div>
+                          <div className="mt-0.5 text-xs text-amber-400">{days}d overdue</div>
                         )}
                       </td>
-                      <td className="px-6 py-5">
-                        <span className={STATUS_STYLES[inv.status]}>{inv.status}</span>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${STATUS_STYLES[inv.status]}`}
+                        >
+                          {inv.status}
+                        </span>
                       </td>
-                      <td className="px-6 py-5 text-right">
+                      <td className="px-5 py-4 text-right">
                         <InvoiceRowActions id={inv.id} status={inv.status} />
                       </td>
                     </tr>
@@ -146,33 +116,8 @@ export default async function InvoicesPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
       )}
     </div>
-  );
-}
-
-function StatPill({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[22px] border border-[rgba(140,126,213,0.14)] bg-white/82 px-4 py-3 shadow-[0_8px_24px_rgba(27,16,89,0.06)]">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
-        {label}
-      </div>
-      <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">{value}</div>
-    </div>
-  );
-}
-
-function InvoiceStackIcon() {
-  return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M7 3h9l2 2v14l-2-1-2 1-2-1-2 1-2-1-2 1V3h1Zm3 5h5M10 12h5M10 16h3"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

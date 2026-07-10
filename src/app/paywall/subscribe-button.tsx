@@ -23,9 +23,13 @@ export function SubscribeButton({ hasTrialed }: { hasTrialed: boolean }) {
     <button
       onClick={start}
       disabled={loading}
-      className="ui-button w-full px-5 py-3.5 text-sm font-semibold disabled:opacity-50"
+      className="w-full rounded-md bg-emerald-500 px-4 py-3 text-sm font-medium text-zinc-950 hover:bg-emerald-400 disabled:opacity-50"
     >
-      {loading ? "Redirecting..." : hasTrialed ? "Subscribe - $25/month" : "Start 7-day free trial"}
+      {loading
+        ? "Redirecting…"
+        : hasTrialed
+          ? "Subscribe — $25/month"
+          : "Start 7-day free trial"}
     </button>
   );
 }

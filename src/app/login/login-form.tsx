@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import Link from "next/link";
 import { signIn } from "@/lib/auth-client";
 
 export function LoginForm() {
@@ -55,62 +56,36 @@ function LoginFormInner() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-12">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(127,69,221,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(145,233,177,0.18),transparent_28%),linear-gradient(180deg,#faf9ff_0%,#f2f1ff_100%)]" />
+    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
+        <Link href="/" className="mb-10 flex items-center gap-2 text-sm font-semibold tracking-tight text-zinc-400 hover:text-zinc-200">
+          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+          Invoice Nudger
+        </Link>
 
-      <div className="relative grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="glass-panel hidden rounded-[34px] p-8 lg:block">
-          <div className="max-w-xl">
-            <div className="inline-flex rounded-full bg-[rgba(127,69,221,0.12)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--violet-strong)]">
-              Invoice Nudger
-            </div>
-            <h1 className="mt-6 text-5xl font-semibold leading-[1.05] text-[var(--foreground)]">
-              Late payments handled with dashboard-grade calm.
-            </h1>
-            <p className="mt-5 text-base leading-8 text-[var(--muted)]">
-              Track invoices, automate reminders, and turn collections into a clean operating
-              rhythm instead of an emotional tax on your week.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-2">
-            <FeatureCard title="Soft lavender UI" body="The product stays readable and premium even when the data gets busy." />
-            <FeatureCard title="Automated nudges" body="Polite, firm, and final reminders move on your timeline." />
-            <FeatureCard title="Payment links" body="Drop in any checkout URL and turn emails into direct payment paths." />
-            <FeatureCard title="Freelancer-first" body="Built to reduce awkward client follow-up loops." />
-          </div>
-        </section>
-
-        <section className="metric-panel rounded-[34px] p-8 shadow-[0_24px_60px_rgba(27,16,89,0.12)]">
-          <div className="space-y-2 text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">
-              Welcome back
-            </div>
-            <h2 className="text-3xl font-semibold text-[var(--foreground)]">Sign in</h2>
-            <p className="text-sm leading-6 text-[var(--muted)]">
-              Open your receivables dashboard and keep the reminders moving.
-            </p>
+        <div className="space-y-6 rounded-xl border border-zinc-800 bg-zinc-950 p-8">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+            <p className="mt-1 text-sm text-zinc-500">Continue to your dashboard.</p>
           </div>
 
           <button
             onClick={handleGoogle}
-            className="ui-button-secondary mt-8 flex w-full items-center justify-center gap-3 px-4 py-3 text-sm font-semibold"
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-sm font-medium text-zinc-100 hover:bg-zinc-900"
           >
             <GoogleIcon />
             Continue with Google
           </button>
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-[rgba(140,126,213,0.18)]" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
-              or
-            </span>
-            <div className="h-px flex-1 bg-[rgba(140,126,213,0.18)]" />
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-zinc-800" />
+            <span className="text-[10px] font-medium uppercase tracking-widest text-zinc-600">or</span>
+            <div className="h-px flex-1 bg-zinc-800" />
           </div>
 
           {status === "sent" ? (
-            <div className="rounded-[24px] border border-[rgba(118,213,151,0.28)] bg-[rgba(203,244,216,0.62)] p-5 text-sm text-[#174b2b]">
-              Check <strong>{email}</strong> for a sign-in link.
+            <div className="rounded-md border border-emerald-900/60 bg-emerald-950/30 p-4 text-sm text-emerald-300">
+              Check <strong className="text-emerald-200">{email}</strong> for a sign-in link.
             </div>
           ) : (
             <form
@@ -118,47 +93,38 @@ function LoginFormInner() {
                 e.preventDefault();
                 void sendMagicLink();
               }}
-              className="space-y-4"
+              className="space-y-3"
             >
-              <label className="block space-y-2">
-                <span className="text-sm font-semibold text-[var(--foreground)]">Email</span>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="ui-input w-full px-4 py-3 text-sm"
-                />
-              </label>
-
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              />
               <button
                 type="submit"
                 disabled={status === "sending"}
-                className="ui-button w-full px-4 py-3 text-sm font-semibold disabled:opacity-50"
+                className="w-full rounded-md bg-emerald-500 px-4 py-2.5 text-sm font-medium text-zinc-950 hover:bg-emerald-400 disabled:opacity-50"
               >
-                {status === "sending" ? "Sending..." : "Send magic link"}
+                {status === "sending" ? "Sending…" : "Send magic link"}
               </button>
             </form>
           )}
-        </section>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-zinc-600">
+          By continuing you agree to our terms and privacy policy.
+        </p>
       </div>
     </main>
   );
 }
 
-function FeatureCard({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-[26px] border border-[rgba(140,126,213,0.14)] bg-white/72 p-5">
-      <div className="text-sm font-semibold text-[var(--foreground)]">{title}</div>
-      <div className="mt-2 text-sm leading-6 text-[var(--muted)]">{body}</div>
-    </div>
-  );
-}
-
 function GoogleIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

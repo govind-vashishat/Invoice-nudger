@@ -54,9 +54,9 @@ function sumByCurrency(rows: { currency: string; amount: string }[]) {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "status-pill bg-[rgba(119,83,214,0.12)] text-[var(--navy)]",
-  overdue: "status-pill bg-[rgba(255,196,95,0.22)] text-[#8a4f00]",
-  paid: "status-pill bg-[rgba(118,213,151,0.22)] text-[#1b6b38]",
+  pending: "bg-zinc-900 text-zinc-300 border border-zinc-800",
+  overdue: "bg-amber-950/40 text-amber-400 border border-amber-900/60",
+  paid: "bg-emerald-950/40 text-emerald-400 border border-emerald-900/60",
 };
 
 export default async function DashboardPage() {
@@ -156,68 +156,61 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="space-y-3">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
-          Dashboard
-        </div>
-        <h1 className="text-4xl font-semibold text-[var(--foreground)]">Collections overview</h1>
-        <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
-          A clean view of what is unpaid, what has been collected, and when the next reminder will
-          go out.
+    <div className="space-y-10">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="mt-1 text-sm text-zinc-500">
+          Overview of outstanding, collected, and scheduled reminders.
         </p>
-      </section>
+      </div>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
           label="Outstanding"
           value={
             outstanding.length === 0
-              ? "0"
-              : outstanding.map((o) => formatAmount(o.total, o.currency)).join(" / ")
+              ? "—"
+              : outstanding.map((o) => formatAmount(o.total, o.currency)).join(" · ")
           }
-          tone="soft"
         />
-        <MetricCard
+        <StatCard
           label="Paid this month"
           value={
             paidThisMonth.length === 0
-              ? "-"
-              : paidThisMonth.map((o) => formatAmount(o.total, o.currency)).join(" / ")
+              ? "—"
+              : paidThisMonth.map((o) => formatAmount(o.total, o.currency)).join(" · ")
           }
+          accent="emerald"
         />
-        <MetricCard label="Overdue invoices" value={String(overdueCount)} />
-        <MetricCard
+        <StatCard label="Overdue" value={String(overdueCount)} accent={overdueCount > 0 ? "amber" : undefined} />
+        <StatCard
           label="Next nudge"
-          value={nextNudgeDate ? fmtDateTime(nextNudgeDate) : "No pending nudges"}
-          tone="mint"
+          value={nextNudgeDate ? fmtDateTime(nextNudgeDate) : "—"}
+          hint={nextNudgeDate ? "cron runs daily at 9AM UTC" : "no pending intervals"}
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <Panel title="Recent invoices" link={{ href: "/invoices", label: "View all" }}>
+      <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <Panel title="Recent invoices" link={{ href: "/invoices", label: "View all →" }}>
           {recentInvoices.length === 0 ? (
-            <EmptyState
-              title="No invoices yet"
-              body="Create your first invoice to start tracking overdue dates and reminders."
-              action={{ href: "/invoices/new", label: "Create invoice" }}
-            />
+            <Empty title="No invoices yet" action={{ href: "/invoices/new", label: "Create invoice" }} />
           ) : (
-            <ul className="space-y-3">
+            <ul className="divide-y divide-zinc-900">
               {recentInvoices.map((inv) => (
-                <li
-                  key={inv.id}
-                  className="flex flex-col gap-3 rounded-[20px] border border-[rgba(125,110,185,0.12)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-                >
+                <li key={inv.id} className="flex items-center justify-between py-3">
                   <div>
-                    <div className="text-sm font-semibold text-[var(--foreground)]">{inv.clientName}</div>
-                    <div className="mt-1 text-xs text-[var(--muted)]">Due {inv.dueDate}</div>
+                    <div className="text-sm font-medium">{inv.clientName}</div>
+                    <div className="mt-0.5 text-xs text-zinc-500">Due {inv.dueDate}</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="text-sm font-semibold text-[var(--foreground)]">
+                    <div className="mono-nums text-sm font-medium">
                       {formatAmount(inv.amount, inv.currency)}
                     </div>
-                    <span className={STATUS_STYLES[inv.status]}>{inv.status}</span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${STATUS_STYLES[inv.status]}`}
+                    >
+                      {inv.status}
+                    </span>
                   </div>
                 </li>
               ))}
@@ -227,69 +220,48 @@ export default async function DashboardPage() {
 
         <Panel title="Recent nudges">
           {recentNudges.length === 0 ? (
-            <EmptyState
-              title="No nudges sent yet"
-              body="Reminders will appear here once invoices move past due and hit your configured intervals."
-            />
+            <Empty title="No nudges sent yet" body="Reminders will appear here once invoices go overdue." />
           ) : (
-            <ul className="space-y-3">
+            <ul className="divide-y divide-zinc-900">
               {recentNudges.map((n) => (
-                <li key={n.id} className="rounded-[20px] border border-[rgba(125,110,185,0.12)] px-4 py-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-semibold text-[var(--foreground)]">
-                      {n.clientName ?? "Unknown client"}
+                <li key={n.id} className="flex items-center justify-between py-3">
+                  <div>
+                    <div className="text-sm font-medium">{n.clientName ?? "—"}</div>
+                    <div className="mt-0.5 text-xs text-zinc-500">
+                      Day {n.intervalDays} · {n.tone}
                     </div>
-                    <span className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--muted)]">
-                      {n.tone}
-                    </span>
                   </div>
-                  <div className="mt-2 text-sm text-[var(--muted)]">
-                    Day {n.intervalDays} reminder
-                  </div>
-                  <div className="mt-3 text-xs text-[var(--muted)]">{fmtDateTime(n.sentAt)}</div>
+                  <div className="mono-nums text-xs text-zinc-500">{fmtDateTime(n.sentAt)}</div>
                 </li>
               ))}
             </ul>
           )}
         </Panel>
       </section>
-
-      <section className="metric-panel rounded-[28px] p-6">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
-          Settings snapshot
-        </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <SimpleStat label="Tone" value={(settingsRow?.tone ?? "auto").toUpperCase()} />
-          <SimpleStat label="Intervals" value={intervals.join(" / ")} />
-          <SimpleStat label="Workspace" value={session.user.name ?? "Freelancer"} />
-        </div>
-      </section>
     </div>
   );
 }
 
-function MetricCard({
+function StatCard({
   label,
   value,
-  tone,
+  hint,
+  accent,
 }: {
   label: string;
   value: string;
-  tone?: "soft" | "mint";
+  hint?: string;
+  accent?: "emerald" | "amber";
 }) {
-  const panelClass =
-    tone === "soft"
-      ? "metric-panel-soft"
-      : tone === "mint"
-        ? "metric-panel-mint"
-        : "metric-panel";
-
+  const valueColor =
+    accent === "emerald" ? "text-emerald-400" : accent === "amber" ? "text-amber-400" : "text-zinc-100";
   return (
-    <div className={`${panelClass} rounded-[24px] p-5`}>
-      <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
-        {label}
+    <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-5">
+      <div className="label-eyebrow">{label}</div>
+      <div className={`mono-nums mt-3 text-xl font-semibold tracking-tight ${valueColor}`}>
+        {value}
       </div>
-      <div className="mt-3 text-2xl font-semibold leading-tight text-[var(--foreground)]">{value}</div>
+      {hint && <div className="mt-1 text-[11px] text-zinc-500">{hint}</div>}
     </div>
   );
 }
@@ -304,49 +276,41 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="metric-panel rounded-[28px] p-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-[var(--foreground)]">{title}</h2>
-        {link ? (
-          <Link href={link.href} className="text-sm font-medium text-[var(--violet-strong)] hover:opacity-80">
+    <section className="rounded-lg border border-zinc-800 bg-zinc-950">
+      <div className="flex items-center justify-between border-b border-zinc-900 px-5 py-3">
+        <h2 className="text-sm font-medium">{title}</h2>
+        {link && (
+          <Link href={link.href} className="text-xs text-zinc-500 hover:text-zinc-300">
             {link.label}
           </Link>
-        ) : null}
+        )}
       </div>
-      <div className="mt-5">{children}</div>
+      <div className="px-5">{children}</div>
     </section>
   );
 }
 
-function EmptyState({
+function Empty({
   title,
   body,
   action,
 }: {
   title: string;
-  body: string;
+  body?: string;
   action?: { href: string; label: string };
 }) {
   return (
-    <div className="rounded-[22px] border border-dashed border-[rgba(125,110,185,0.18)] px-6 py-10 text-center">
-      <div className="text-lg font-semibold text-[var(--foreground)]">{title}</div>
-      <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--muted)]">{body}</p>
-      {action ? (
-        <Link href={action.href} className="ui-button mt-5 inline-flex px-5 py-3 text-sm font-semibold">
+    <div className="py-10 text-center">
+      <div className="text-sm font-medium text-zinc-300">{title}</div>
+      {body && <p className="mx-auto mt-2 max-w-sm text-xs text-zinc-500">{body}</p>}
+      {action && (
+        <Link
+          href={action.href}
+          className="mt-4 inline-block rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-medium text-zinc-950 hover:bg-emerald-400"
+        >
           {action.label}
         </Link>
-      ) : null}
-    </div>
-  );
-}
-
-function SimpleStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[20px] border border-[rgba(125,110,185,0.12)] bg-[rgba(255,255,255,0.72)] px-4 py-4">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
-        {label}
-      </div>
-      <div className="mt-2 text-sm font-semibold text-[var(--foreground)]">{value}</div>
+      )}
     </div>
   );
 }
