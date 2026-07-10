@@ -33,6 +33,7 @@ function startOfMonthUTC() {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 }
+
 function startOfNextMonthUTC() {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
@@ -53,9 +54,9 @@ function sumByCurrency(rows: { currency: string; amount: string }[]) {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
-  overdue: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  paid: "bg-green-100 text-green-900 dark:bg-green-950 dark:text-green-200",
+  pending: "status-pill bg-[rgba(119,83,214,0.12)] text-[var(--navy)]",
+  overdue: "status-pill bg-[rgba(255,196,95,0.22)] text-[#8a4f00]",
+  paid: "status-pill bg-[rgba(118,213,151,0.22)] text-[#1b6b38]",
 };
 
 export default async function DashboardPage() {
@@ -156,109 +157,144 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+      <section className="space-y-3">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
+          Dashboard
+        </div>
+        <h1 className="text-4xl font-semibold text-[var(--foreground)]">Collections overview</h1>
+        <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
+          A clean view of what is unpaid, what has been collected, and when the next reminder will
+          go out.
+        </p>
+      </section>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Outstanding">
-          {outstanding.length === 0 ? (
-            <Big>—</Big>
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Outstanding"
+          value={
+            outstanding.length === 0
+              ? "0"
+              : outstanding.map((o) => formatAmount(o.total, o.currency)).join(" / ")
+          }
+          tone="soft"
+        />
+        <MetricCard
+          label="Paid this month"
+          value={
+            paidThisMonth.length === 0
+              ? "-"
+              : paidThisMonth.map((o) => formatAmount(o.total, o.currency)).join(" / ")
+          }
+        />
+        <MetricCard label="Overdue invoices" value={String(overdueCount)} />
+        <MetricCard
+          label="Next nudge"
+          value={nextNudgeDate ? fmtDateTime(nextNudgeDate) : "No pending nudges"}
+          tone="mint"
+        />
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <Panel title="Recent invoices" link={{ href: "/invoices", label: "View all" }}>
+          {recentInvoices.length === 0 ? (
+            <EmptyState
+              title="No invoices yet"
+              body="Create your first invoice to start tracking overdue dates and reminders."
+              action={{ href: "/invoices/new", label: "Create invoice" }}
+            />
           ) : (
-            <div className="space-y-0.5">
-              {outstanding.map((o) => (
-                <Big key={o.currency}>{formatAmount(o.total, o.currency)}</Big>
-              ))}
-            </div>
-          )}
-        </StatCard>
-        <StatCard label="Paid this month">
-          {paidThisMonth.length === 0 ? (
-            <Big>—</Big>
-          ) : (
-            <div className="space-y-0.5">
-              {paidThisMonth.map((o) => (
-                <Big key={o.currency}>{formatAmount(o.total, o.currency)}</Big>
-              ))}
-            </div>
-          )}
-        </StatCard>
-        <StatCard label="Overdue">
-          <Big>{overdueCount}</Big>
-          <div className="text-xs text-zinc-500">invoices past due date</div>
-        </StatCard>
-        <StatCard label="Next nudge">
-          <Big>{nextNudgeDate ? fmtDateTime(nextNudgeDate) : "—"}</Big>
-          <div className="text-xs text-zinc-500">cron runs daily at 9 AM UTC</div>
-        </StatCard>
-      </div>
-
-      <Section title="Recent invoices" link={{ href: "/invoices", label: "View all →" }}>
-        {recentInvoices.length === 0 ? (
-          <Empty>
-            No invoices yet.{" "}
-            <Link href="/invoices/new" className="underline">
-              Log one
-            </Link>
-            .
-          </Empty>
-        ) : (
-          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {recentInvoices.map((inv) => (
-              <li key={inv.id} className="flex items-center justify-between py-3">
-                <div>
-                  <div className="text-sm font-medium">{inv.clientName}</div>
-                  <div className="text-xs text-zinc-500">Due {inv.dueDate}</div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-sm font-medium">{formatAmount(inv.amount, inv.currency)}</div>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[inv.status]}`}
-                  >
-                    {inv.status}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
-
-      <Section title="Recent nudges">
-        {recentNudges.length === 0 ? (
-          <Empty>No nudges sent yet. They&apos;ll appear here once invoices go overdue.</Empty>
-        ) : (
-          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {recentNudges.map((n) => (
-              <li key={n.id} className="flex items-center justify-between py-3">
-                <div>
-                  <div className="text-sm font-medium">{n.clientName ?? "—"}</div>
-                  <div className="text-xs text-zinc-500">
-                    Day {n.intervalDays} · {n.tone}
+            <ul className="space-y-3">
+              {recentInvoices.map((inv) => (
+                <li
+                  key={inv.id}
+                  className="flex flex-col gap-3 rounded-[20px] border border-[rgba(125,110,185,0.12)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <div className="text-sm font-semibold text-[var(--foreground)]">{inv.clientName}</div>
+                    <div className="mt-1 text-xs text-[var(--muted)]">Due {inv.dueDate}</div>
                   </div>
-                </div>
-                <div className="text-xs text-zinc-500">{fmtDateTime(n.sentAt)}</div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm font-semibold text-[var(--foreground)]">
+                      {formatAmount(inv.amount, inv.currency)}
+                    </div>
+                    <span className={STATUS_STYLES[inv.status]}>{inv.status}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
+        <Panel title="Recent nudges">
+          {recentNudges.length === 0 ? (
+            <EmptyState
+              title="No nudges sent yet"
+              body="Reminders will appear here once invoices move past due and hit your configured intervals."
+            />
+          ) : (
+            <ul className="space-y-3">
+              {recentNudges.map((n) => (
+                <li key={n.id} className="rounded-[20px] border border-[rgba(125,110,185,0.12)] px-4 py-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-semibold text-[var(--foreground)]">
+                      {n.clientName ?? "Unknown client"}
+                    </div>
+                    <span className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--muted)]">
+                      {n.tone}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-sm text-[var(--muted)]">
+                    Day {n.intervalDays} reminder
+                  </div>
+                  <div className="mt-3 text-xs text-[var(--muted)]">{fmtDateTime(n.sentAt)}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      </section>
+
+      <section className="metric-panel rounded-[28px] p-6">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
+          Settings snapshot
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <SimpleStat label="Tone" value={(settingsRow?.tone ?? "auto").toUpperCase()} />
+          <SimpleStat label="Intervals" value={intervals.join(" / ")} />
+          <SimpleStat label="Workspace" value={session.user.name ?? "Freelancer"} />
+        </div>
+      </section>
     </div>
   );
 }
 
-function StatCard({ label, children }: { label: string; children: React.ReactNode }) {
+function MetricCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "soft" | "mint";
+}) {
+  const panelClass =
+    tone === "soft"
+      ? "metric-panel-soft"
+      : tone === "mint"
+        ? "metric-panel-mint"
+        : "metric-panel";
+
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="text-xs font-medium uppercase tracking-wider text-zinc-500">{label}</div>
-      <div className="mt-1">{children}</div>
+    <div className={`${panelClass} rounded-[24px] p-5`}>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+        {label}
+      </div>
+      <div className="mt-3 text-2xl font-semibold leading-tight text-[var(--foreground)]">{value}</div>
     </div>
   );
 }
 
-function Big({ children }: { children: React.ReactNode }) {
-  return <div className="text-2xl font-semibold tracking-tight">{children}</div>;
-}
-
-function Section({
+function Panel({
   title,
   link,
   children,
@@ -268,22 +304,49 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{title}</h2>
-        {link && (
-          <Link href={link.href} className="text-xs text-zinc-500 hover:underline">
+    <section className="metric-panel rounded-[28px] p-6">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold text-[var(--foreground)]">{title}</h2>
+        {link ? (
+          <Link href={link.href} className="text-sm font-medium text-[var(--violet-strong)] hover:opacity-80">
             {link.label}
           </Link>
-        )}
+        ) : null}
       </div>
-      <div className="rounded-xl border border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-950">
-        {children}
-      </div>
+      <div className="mt-5">{children}</div>
     </section>
   );
 }
 
-function Empty({ children }: { children: React.ReactNode }) {
-  return <div className="py-8 text-center text-sm text-zinc-500">{children}</div>;
+function EmptyState({
+  title,
+  body,
+  action,
+}: {
+  title: string;
+  body: string;
+  action?: { href: string; label: string };
+}) {
+  return (
+    <div className="rounded-[22px] border border-dashed border-[rgba(125,110,185,0.18)] px-6 py-10 text-center">
+      <div className="text-lg font-semibold text-[var(--foreground)]">{title}</div>
+      <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--muted)]">{body}</p>
+      {action ? (
+        <Link href={action.href} className="ui-button mt-5 inline-flex px-5 py-3 text-sm font-semibold">
+          {action.label}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+function SimpleStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[20px] border border-[rgba(125,110,185,0.12)] bg-[rgba(255,255,255,0.72)] px-4 py-4">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+        {label}
+      </div>
+      <div className="mt-2 text-sm font-semibold text-[var(--foreground)]">{value}</div>
+    </div>
+  );
 }

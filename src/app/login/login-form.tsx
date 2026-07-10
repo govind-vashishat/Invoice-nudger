@@ -55,58 +55,104 @@ function LoginFormInner() {
   }
 
   return (
-    <main className="flex min-h-screen flex-1 items-center justify-center bg-zinc-50 px-6 dark:bg-black">
-      <div className="w-full max-w-sm space-y-8 rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
-          <p className="text-sm text-zinc-500">to Invoice Nudger</p>
-        </div>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-12">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(127,69,221,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(145,233,177,0.18),transparent_28%),linear-gradient(180deg,#faf9ff_0%,#f2f1ff_100%)]" />
 
-        <button
-          onClick={handleGoogle}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-800"
-        >
-          <GoogleIcon />
-          Continue with Google
-        </button>
-
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
-          <span className="text-xs uppercase tracking-wider text-zinc-400">or</span>
-          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
-        </div>
-
-        {status === "sent" ? (
-          <div className="rounded-lg bg-green-50 p-4 text-sm text-green-900 dark:bg-green-950 dark:text-green-100">
-            Check <strong>{email}</strong> for a sign-in link.
+      <div className="relative grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="glass-panel hidden rounded-[34px] p-8 lg:block">
+          <div className="max-w-xl">
+            <div className="inline-flex rounded-full bg-[rgba(127,69,221,0.12)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--violet-strong)]">
+              Invoice Nudger
+            </div>
+            <h1 className="mt-6 text-5xl font-semibold leading-[1.05] text-[var(--foreground)]">
+              Late payments handled with dashboard-grade calm.
+            </h1>
+            <p className="mt-5 text-base leading-8 text-[var(--muted)]">
+              Track invoices, automate reminders, and turn collections into a clean operating
+              rhythm instead of an emotional tax on your week.
+            </p>
           </div>
-        ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void sendMagicLink();
-            }}
-            className="space-y-3"
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-2">
+            <FeatureCard title="Soft lavender UI" body="The product stays readable and premium even when the data gets busy." />
+            <FeatureCard title="Automated nudges" body="Polite, firm, and final reminders move on your timeline." />
+            <FeatureCard title="Payment links" body="Drop in any checkout URL and turn emails into direct payment paths." />
+            <FeatureCard title="Freelancer-first" body="Built to reduce awkward client follow-up loops." />
+          </div>
+        </section>
+
+        <section className="metric-panel rounded-[34px] p-8 shadow-[0_24px_60px_rgba(27,16,89,0.12)]">
+          <div className="space-y-2 text-center">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--muted)]">
+              Welcome back
+            </div>
+            <h2 className="text-3xl font-semibold text-[var(--foreground)]">Sign in</h2>
+            <p className="text-sm leading-6 text-[var(--muted)]">
+              Open your receivables dashboard and keep the reminders moving.
+            </p>
+          </div>
+
+          <button
+            onClick={handleGoogle}
+            className="ui-button-secondary mt-8 flex w-full items-center justify-center gap-3 px-4 py-3 text-sm font-semibold"
           >
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900"
-            />
-            <button
-              type="submit"
-              disabled={status === "sending"}
-              className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            <GoogleIcon />
+            Continue with Google
+          </button>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-[rgba(140,126,213,0.18)]" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+              or
+            </span>
+            <div className="h-px flex-1 bg-[rgba(140,126,213,0.18)]" />
+          </div>
+
+          {status === "sent" ? (
+            <div className="rounded-[24px] border border-[rgba(118,213,151,0.28)] bg-[rgba(203,244,216,0.62)] p-5 text-sm text-[#174b2b]">
+              Check <strong>{email}</strong> for a sign-in link.
+            </div>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void sendMagicLink();
+              }}
+              className="space-y-4"
             >
-              {status === "sending" ? "Sending…" : "Send magic link"}
-            </button>
-          </form>
-        )}
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-[var(--foreground)]">Email</span>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="ui-input w-full px-4 py-3 text-sm"
+                />
+              </label>
+
+              <button
+                type="submit"
+                disabled={status === "sending"}
+                className="ui-button w-full px-4 py-3 text-sm font-semibold disabled:opacity-50"
+              >
+                {status === "sending" ? "Sending..." : "Send magic link"}
+              </button>
+            </form>
+          )}
+        </section>
       </div>
     </main>
+  );
+}
+
+function FeatureCard({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-[26px] border border-[rgba(140,126,213,0.14)] bg-white/72 p-5">
+      <div className="text-sm font-semibold text-[var(--foreground)]">{title}</div>
+      <div className="mt-2 text-sm leading-6 text-[var(--muted)]">{body}</div>
+    </div>
   );
 }
 

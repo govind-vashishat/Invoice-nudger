@@ -44,17 +44,17 @@ export function InvoiceRowActions({ id, status }: { id: string; status: string }
         <button
           onClick={markPaid}
           disabled={busy !== null}
-          className="rounded-md border border-zinc-200 px-2 py-1 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          className="rounded-full border border-[rgba(118,213,151,0.34)] bg-[rgba(118,213,151,0.16)] px-3 py-2 text-xs font-semibold text-[#1b6b38] hover:bg-[rgba(118,213,151,0.24)] disabled:opacity-50"
         >
-          {busy === "pay" ? "…" : "Mark paid"}
+          {busy === "pay" ? "Saving..." : "Mark paid"}
         </button>
       )}
       <button
         onClick={remove}
         disabled={busy !== null}
-        className="rounded-md border border-zinc-200 px-2 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-red-950"
+        className="rounded-full border border-[rgba(243,120,120,0.24)] bg-[rgba(255,243,243,0.86)] px-3 py-2 text-xs font-semibold text-[#b53e49] hover:bg-[rgba(255,235,235,0.96)] disabled:opacity-50"
       >
-        {busy === "delete" ? "…" : "Delete"}
+        {busy === "delete" ? "Deleting..." : "Delete"}
       </button>
     </div>
   );

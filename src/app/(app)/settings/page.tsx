@@ -20,13 +20,18 @@ export default async function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          These power every nudge we send on your behalf.
+    <div className="mx-auto max-w-4xl space-y-6">
+      <section className="glass-panel rounded-[30px] p-6">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
+          Configuration
+        </div>
+        <h2 className="mt-2 text-3xl font-semibold text-[var(--foreground)]">Reminder settings</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+          These controls shape every client email: the link they click, the sender they see, the
+          cadence of reminders, and how assertive the copy feels over time.
         </p>
-      </div>
+      </section>
+
       <SettingsForm
         initial={{
           paymentUrl: initial.paymentUrl ?? "",

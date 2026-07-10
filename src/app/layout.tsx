@@ -1,17 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Invoice Nudger",
@@ -24,13 +13,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className="h-full antialiased" data-scroll-behavior="smooth">
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
-        <Toaster position="top-center" richColors />
+        <Toaster
+          position="top-center"
+          theme="dark"
+          toastOptions={{
+            classNames: {
+              toast:
+                "!rounded-lg !border !border-zinc-800 !bg-zinc-950 !text-zinc-100",
+              title: "!text-zinc-100",
+              description: "!text-zinc-400",
+              actionButton: "!bg-emerald-500 !text-zinc-950",
+            },
+          }}
+        />
       </body>
     </html>
   );

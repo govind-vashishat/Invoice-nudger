@@ -5,6 +5,13 @@ import { db, subscriptions } from "@/db";
 import { requireSession } from "@/lib/session";
 import { SignOutButton } from "@/components/sign-out-button";
 
+const navItems = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/invoices", label: "Invoices" },
+  { href: "/invoices/new", label: "New invoice" },
+  { href: "/settings", label: "Settings" },
+];
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await requireSession();
 
@@ -14,6 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .where(eq(subscriptions.userId, session.user.id))
     .limit(1);
 
+  // Server component runs once per request; current time is intentional here.
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const hasAccess =
@@ -25,32 +33,46 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!hasAccess) redirect("/paywall");
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-black">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="text-sm font-semibold tracking-tight">
-              Invoice Nudger
-            </Link>
-            <nav className="flex items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
-              <Link href="/dashboard" className="hover:text-zinc-900 dark:hover:text-zinc-100">
-                Dashboard
+    <div className="app-shell min-h-screen">
+      <header className="border-b border-[rgba(125,110,185,0.12)] bg-white/82 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-5 sm:px-8 lg:px-10">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/dashboard"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--navy)] text-sm font-black text-white"
+              >
+                IN
               </Link>
-              <Link href="/invoices" className="hover:text-zinc-900 dark:hover:text-zinc-100">
-                Invoices
-              </Link>
-              <Link href="/settings" className="hover:text-zinc-900 dark:hover:text-zinc-100">
-                Settings
-              </Link>
-            </nav>
+              <div>
+                <div className="text-sm font-semibold text-[var(--foreground)]">Invoice Nudger</div>
+                <div className="text-xs text-[var(--muted)]">Collections workspace</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="hidden rounded-full border border-[rgba(125,110,185,0.14)] bg-white px-4 py-2 text-sm text-[var(--muted)] sm:block">
+                {session.user.email}
+              </div>
+              <SignOutButton />
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-zinc-500">{session.user.email}</span>
-            <SignOutButton />
-          </div>
+
+          <nav className="flex flex-wrap gap-2">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="ui-button-secondary px-4 py-2 text-sm font-medium"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </header>
-      <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</div>
+
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8 sm:px-8 lg:px-10">{children}</main>
     </div>
   );
 }

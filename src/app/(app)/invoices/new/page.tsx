@@ -52,34 +52,54 @@ export default function NewInvoicePage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
-      <div>
-        <Link href="/invoices" className="text-sm text-zinc-500 hover:underline">
-          ← Invoices
+    <div className="mx-auto max-w-4xl space-y-6">
+      <section className="glass-panel rounded-[30px] p-6">
+        <Link href="/invoices" className="text-sm font-medium text-[var(--violet-strong)] hover:underline">
+          Back to invoices
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">New invoice</h1>
-      </div>
+        <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
+              New record
+            </div>
+            <h2 className="mt-2 text-3xl font-semibold text-[var(--foreground)]">Log invoice</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+              Add the client, amount, due date, and any helpful notes. Once saved, this invoice can
+              be nudged automatically when it becomes overdue.
+            </p>
+          </div>
+          <div className="rounded-[24px] border border-[rgba(140,126,213,0.14)] bg-white/82 px-4 py-3">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+              Default sequence
+            </div>
+            <div className="mt-1 text-sm font-semibold text-[var(--foreground)]">7 / 14 / 21 days</div>
+          </div>
+        </div>
+      </section>
 
       <form
         onSubmit={(e) => {
           e.preventDefault();
           void submit(new FormData(e.currentTarget));
         }}
-        className="space-y-5 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+        className="metric-panel space-y-6 rounded-[30px] p-6 sm:p-8"
       >
-        <Field label="Client name">
-          <input name="clientName" required maxLength={200} autoFocus className={inputCls} />
-        </Field>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Field label="Client name" hint="Who should receive the reminders?">
+            <input name="clientName" required maxLength={200} autoFocus className={inputCls} />
+          </Field>
 
-        <Field label="Client email">
-          <input name="clientEmail" type="email" required maxLength={254} className={inputCls} />
-        </Field>
+          <Field label="Client email" hint="Used for reminder delivery.">
+            <input name="clientEmail" type="email" required maxLength={254} className={inputCls} />
+          </Field>
+        </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <Field label="Amount" className="col-span-2">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <Field label="Amount" hint="Invoice total before the reminder sequence begins.">
             <input name="amount" type="number" step="0.01" min="0.01" required className={inputCls} />
           </Field>
-          <Field label="Currency">
+
+          <Field label="Currency" hint="Displayed everywhere this invoice appears.">
             <select name="currency" defaultValue="USD" className={inputCls}>
               {COMMON_CURRENCIES.map((c) => (
                 <option key={c} value={c}>
@@ -90,32 +110,33 @@ export default function NewInvoicePage() {
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Date sent">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Field label="Date sent" hint="When you originally sent the invoice.">
             <input name="dateSent" type="date" defaultValue={todayISO()} required className={inputCls} />
           </Field>
-          <Field label="Due date">
+
+          <Field label="Due date" hint="The system starts calculating overdue windows from this date.">
             <input name="dueDate" type="date" defaultValue={inDaysISO(30)} required className={inputCls} />
           </Field>
         </div>
 
-        <Field label="Notes (optional)">
-          <textarea name="notes" rows={3} maxLength={2000} className={inputCls} />
+        <Field label="Notes" hint="Optional internal notes for context or follow-up history.">
+          <textarea name="notes" rows={5} maxLength={2000} className={`${inputCls} resize-none`} />
         </Field>
 
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="flex flex-col gap-3 border-t border-[rgba(140,126,213,0.14)] pt-6 sm:flex-row sm:justify-end">
           <Link
             href="/invoices"
-            className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+            className="ui-button-secondary inline-flex items-center justify-center px-5 py-3 text-sm font-semibold"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="ui-button px-5 py-3 text-sm font-semibold disabled:opacity-50"
           >
-            {submitting ? "Saving…" : "Save invoice"}
+            {submitting ? "Saving..." : "Save invoice"}
           </button>
         </div>
       </form>
@@ -123,22 +144,22 @@ export default function NewInvoicePage() {
   );
 }
 
-const inputCls =
-  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900";
+const inputCls = "ui-input w-full px-4 py-3 text-sm";
 
 function Field({
   label,
+  hint,
   children,
-  className,
 }: {
   label: string;
+  hint: string;
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <label className={`block space-y-1.5 ${className ?? ""}`}>
-      <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">{label}</span>
+    <label className="block space-y-2">
+      <span className="text-sm font-semibold text-[var(--foreground)]">{label}</span>
       {children}
+      <span className="block text-xs leading-5 text-[var(--muted)]">{hint}</span>
     </label>
   );
 }
